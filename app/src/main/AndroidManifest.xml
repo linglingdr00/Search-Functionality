@@ -15,16 +15,6 @@
         <provider android:name=".MySuggestionProvider"
             android:authorities="com.linglingdr00.searchfunctionality.MySuggestionProvider" />
         <activity
-            android:name=".SearchableActivity"
-            android:exported="false">
-            <!-- search -->
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-            </intent-filter>
-            <meta-data android:name="android.app.searchable"
-                android:resource="@xml/searchable"/>
-        </activity>
-        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name">
@@ -34,8 +24,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <!-- search -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable"/>
+            <!-- search
             <meta-data android:name="android.app.default_searchable"
-                android:value=".SearchableActivity" />
+                android:value=".SearchableActivity" />-->
         </activity>
     </application>
 

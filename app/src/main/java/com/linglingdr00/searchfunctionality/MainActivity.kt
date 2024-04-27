@@ -3,7 +3,10 @@ package com.linglingdr00.searchfunctionality
 import android.app.SearchManager
 import android.content.Context
 import android.os.Bundle
+import android.provider.SearchRecentSuggestions
+import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.navigation.findNavController
@@ -45,14 +48,67 @@ class MainActivity : AppCompatActivity() {
         val inflater = menuInflater
         inflater.inflate(R.menu.app_bar_menu, menu)
 
+        val searchItem = menu?.findItem(R.id.search)
+        val searchView = searchItem?.actionView as SearchView
+
+        // Get the MenuItem for the action item.
+        val dateItem = menu.findItem(R.id.date)
+
+        // add search suggestion
+        val suggestions = SearchRecentSuggestions(this, MySuggestionProvider.AUTHORITY, MySuggestionProvider.MODE)
+
         // Get the SearchView and set the searchable configuration.
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
-        (menu?.findItem(R.id.search)?.actionView as SearchView).apply {
+        searchView.apply {
             // Assumes current activity is the searchable activity.
             setSearchableInfo(searchManager.getSearchableInfo(componentName))
             setIconifiedByDefault(false) // Don't iconify the widget. Expand it by default.
+
+            setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    Log.d(TAG, "query text submit: $query")
+                    // save search suggestion
+                    suggestions.saveRecentQuery(query, null)
+                    return true
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    Log.d(TAG, "query text change: $newText")
+                    return true
+                }
+
+            })
+
         }
 
-        return true
+        // Configure the search info and add any event listeners.
+        // Define the listener.
+        val expandListener = object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                // Do something when the action item collapses.
+                Log.d(TAG, "search view collapse")
+                dateItem.setVisible(false)
+                return true // Return true to collapse the action view.
+            }
+
+            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                // Do something when it expands.
+                Log.d(TAG, "search view expand")
+                dateItem.setVisible(true)
+                return true // Return true to expand the action view.
+            }
+        }
+
+        // Assign the listener to that action item.
+        searchItem.setOnActionExpandListener(expandListener)
+
+        // For anything else you have to do when creating the options menu,
+        // do the following:
+
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    companion object {
+        const val TAG = "MainActivity"
     }
 }
